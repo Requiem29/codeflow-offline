@@ -1,432 +1,227 @@
-<div align="center">
+# Codeflow-Offline
 
-# CodeFlow
-
-### Visualize Your Codebase Architecture in Seconds
-
-**Zero setup. No installation. Just paste a GitHub URL.**
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-
-[**Try it Now**](https://codeflow-five.vercel.app/) · [Report Bug](https://github.com/braedonsaunders/codeflow/issues) · [Request Feature](https://github.com/braedonsaunders/codeflow/issues)
-
-<img src="./screenshot.png" alt="CodeFlow Screenshot" width="100%"/>
-
-</div>
+> Version autonome et hors-ligne de CodeFlow, un visualiseur d'architecture de code exécuté entièrement dans le navigateur, sans dépendance serveur ni connexion réseau requise.
 
 ---
 
-## Why CodeFlow?
+## 📌 Informations générales
 
-Ever opened a new codebase and felt completely lost? **CodeFlow** turns any GitHub repository or local codebase into an interactive architecture map in seconds.
-
-- **No installation required** — runs entirely in your browser
-- **No data collection** — your code never leaves your machine
-- **No accounts** — just paste a URL or select local files and go
-- **Works offline** — analyze local files without internet
-
-```
-Paste URL / Select Files -> See Architecture -> Make Better Decisions
-```
-
----
-
-## Features
-
-### Interactive Dependency Graph
-See how your files connect at a glance. Click any node to highlight its dependencies. Drag, zoom, and explore.
-
-### Blast Radius Analysis
-*"If I change this file, what breaks?"* — CodeFlow answers this instantly. Select any file and see exactly how many files would be affected by changes.
-
-### Code Ownership
-Know who owns what. See the top contributors for any file based on git history. Perfect for code reviews and knowing who to ask.
-
-### Security Scanner
-Automatic detection of:
-- Hardcoded secrets & API keys
-- SQL injection vulnerabilities
-- Dangerous `eval()` usage
-- Debug statements in production code
-
-### Pattern Detection
-Automatically identifies:
-- Singleton patterns
-- Factory patterns
-- Observer/Event patterns
-- React custom hooks
-- Anti-patterns (God Objects, high coupling)
-
-### Health Score
-Get an instant A-F grade for your codebase based on:
-- Dead code percentage
-- Circular dependencies
-- Coupling metrics
-- Security issues
-
-### Activity Heatmap
-Color files by commit frequency to see which parts of your codebase are most actively developed.
-
-### PR Impact Analysis
-Paste a PR URL to see exactly which files it affects and calculate the blast radius of proposed changes.
-
-### CodeFlow Card (GitHub Action)
-Health grade, scale, fragility, and hidden costs as a self-updating SVG on your README — recomputed every merge, with optional thermal-receipt PR comments. See [card/](./card/).
-
-### Markdown & Wiki-Link Graph
-Point CodeFlow at an Obsidian vault or any markdown directory to see notes as a connected graph. Both `[[wiki-links]]` and `[text](./relative.md)` links become edges; each note is a `note`-layer node (distinct color) with a `dependencies[]` array in the JSON export.
-
-### Local File Analysis
-Analyze code directly from your computer without uploading to GitHub:
-- **Privacy First:** Your code never leaves your machine
-- **Offline Support:** Works without internet connection
-- **Drag & Drop:** Simply drag files or folders to analyze
-- **Folder Scanning:** Recursively analyze entire project structures
-- **Exclude Patterns:** Skip attachments, caches, generated assets, and other irrelevant paths before scanning
-- **Instant Results:** All processing happens in your browser
+| Élément              | Valeur                                                    |
+| -------------------- | --------------------------------------------------------- |
+| Domaine              | Analyse de code / Visualisation d'architecture logicielle |
+| Responsable          | R                                                         |
+| Équipe               | -                                                         |
+| Statut               | En cours / Maintenance                                    |
+| Criticité            | Moyenne                                                   |
+| Environnement(s)     | Local / Offline                                           |
+| Dernière mise à jour | 11 Mai 2026                                               |
 
 ---
 
-## CodeFlow Card
+## 📖 Description
 
-A GitHub Action that drops an auto-updating SVG card on your README, recomputed on every merge by the same analyzer as the web app. Five styles, accent presets, opt-in PR receipts, and a privacy mode for public repos. The card adapts to the viewer's light/dark theme automatically.
+Codeflow-Offline permet d'analyser et de visualiser la structure d'un projet directement depuis un navigateur, en environnement local.
 
-<p align="center">
-  <img src="./card/examples/compact.svg" alt="CodeFlow card — compact style" width="100%" />
-</p>
+L'application permet notamment de représenter les dépendances entre fichiers, d'explorer des graphes, d'identifier des zones sensibles du code et d'exporter des rapports sans envoyer de données vers un service externe.
 
-See [card/](./card/) for setup, or jump to the [style gallery](#card-style-gallery) below.
+Elle s'adresse principalement :
 
----
-
-## Privacy First
-
-**Your code stays on your machine.** CodeFlow:
-
-- Runs 100% in the browser
-- Makes API calls directly from your browser to GitHub
-- Never stores your code or tokens
-- Works with private repos (just add your token locally)
-- No analytics or tracking
-
-Your GitHub token (if used) is only stored in your browser's memory and is cleared when you close the tab.
+* aux développeurs souhaitant analyser un dépôt localement ;
+* aux équipes soumises à des contraintes de confidentialité ;
+* aux contextes sans connexion Internet ;
+* aux environnements où l'installation de dépendances serveur doit être évitée.
 
 ---
 
-## Quick Start
+## 🔐 Accès
 
-### Option 1: Use Online (Recommended)
-Just visit [CodeFlow](https://codeflow-five.vercel.app/) and paste any GitHub URL.
-
-### Option 2: Self-Host
-```bash
-# Clone the repo
-git clone https://github.com/braedonsaunders/codeflow.git
-
-# That's it! Just open index.html in your browser
-open index.html
-```
-
-No build process. No npm install. It is a single `index.html` app that loads pinned browser dependencies from CDNs.
-
-### Option 3: Analyze Local Files
-You can now analyze code directly from your local machine without uploading to GitHub:
-
-1. Open CodeFlow in your browser
-2. Click the "Open Folder" button
-3. Select the folder or files you want to analyze
-4. CodeFlow will process them entirely in your browser
-
-**Perfect for:**
-- Private projects you don't want to upload
-- Offline development
-- Quick local analysis before committing
-- Working with sensitive code
+| Accès            | Détail                                                 |
+| ---------------- | ------------------------------------------------------ |
+| URL              | `http://127.0.0.1:8080/index.html` en exécution locale |
+| Authentification | Aucune authentification par défaut                     |
+| Profils / rôles  | Utilisateur local / Développeur                        |
+| Demande d'accès  | Non concerné en mode local ; accès au dépôt nécessaire |
 
 ---
 
-## Usage
+## ✨ Fonctionnalités principales
 
-### Public Repositories
-```
-Just paste: facebook/react
-Or full URL: https://github.com/facebook/react
-```
-
-### Private Repositories
-1. Create a [GitHub Personal Access Token](https://github.com/settings/tokens) with `repo` scope
-2. Paste it in the Token field
-3. Analyze your private repos
-
-### Local Files
-Click the "Open Folder" button to analyze code from your computer:
-- **Folder Analysis:** Select a folder to analyze all supported files recursively
-- **File Selection:** Choose specific files to analyze
-- **Drag & Drop:** Drag files or folders directly onto the page
-- **Custom Excludes:** Add patterns like `uploads/**`, `**/cache/**`, or `*.png` before scanning
-
-All processing happens locally in your browser - nothing is uploaded.
-
-### Shareable Links
-After analysis, click the "Share" button to copy a shareable link. Anyone can re-run the same analysis.
-
-### Export Reports
-Export your analysis in multiple formats for further processing:
-
-- **JSON Report** - Complete analysis data including:
-  - Repository metadata and health score
-  - All files with functions, dependencies, and churn data
-  - Complete function statistics with callers and usage metrics
-  - Security issues, patterns, and architecture issues
-  - Duplicate code detection and layer violations
-  - Suggestions and recommendations
-  - Language breakdown and folder structure
-  
-  Perfect for programmatic analysis, CI/CD integration, or custom reporting tools.
-
-- **Markdown Report** - Human-readable formatted report
-- **Plain Text Report** - Simple text format
-- **SVG Image** - Export the dependency graph visualization
-- **Raw JSON** - Simplified data export
-
-Click the "Export" button in the top bar after analysis to access all export options.
+* Visualisation interactive du graphe de dépendances.
+* Analyse d'impact, ou « blast radius », pour un fichier sélectionné.
+* Détection de motifs et d'anti-patterns, par exemple singletons ou factories.
+* Score de santé du code basé sur plusieurs métriques : couplage, code mort, cycles, etc.
+* Analyse locale et hors-ligne, exécutée côté navigateur.
+* Export des rapports en JSON, Markdown et SVG.
 
 ---
 
-## Supported Languages
+## 🧱 Architecture / fonctionnement
 
-CodeFlow extracts functions and analyzes dependencies for:
+Codeflow-Offline est une application front-end statique exécutée dans le navigateur. Elle repose sur des bibliothèques JavaScript et WebAssembly embarquées localement dans le dépôt.
 
-| Language | Extensions |
-|----------|------------|
-| JavaScript | `.js`, `.jsx` |
-| TypeScript | `.ts`, `.tsx` |
-| HTML (inline scripts) | `.html`, `.htm`, `.xhtml` |
-| Python | `.py` |
-| Java | `.java` |
-| Go | `.go` |
-| Ruby | `.rb` |
-| PHP | `.php` |
-| Vue | `.vue` |
-| Svelte | `.svelte` |
-| Rust | `.rs` |
-| C | `.c`, `.h` |
-| C++ | `.cpp`, `.cc`, `.cxx`, `.hpp`, `.hh`, `.hxx` |
-| C# | `.cs` |
-| Swift | `.swift` |
-| Kotlin | `.kt`, `.kts` |
-| Scala | `.scala`, `.sc` |
-| Groovy | `.groovy`, `.gvy` |
-| Elixir | `.ex`, `.exs` |
-| Erlang | `.erl`, `.hrl` |
-| Haskell | `.hs`, `.lhs` |
-| Lua | `.lua` |
-| R | `.r`, `.R` |
-| Julia | `.jl` |
-| Dart | `.dart` |
-| Perl | `.pl`, `.pm` |
-| Shell | `.sh`, `.bash`, `.zsh`, `.fish` |
-| PowerShell | `.ps1`, `.psm1`, `.psd1` |
-| F# | `.fs`, `.fsi`, `.fsx` |
-| OCaml | `.ml`, `.mli` |
-| Clojure | `.clj`, `.cljs`, `.cljc` |
-| Elm | `.elm` |
-| VBA | `.vba`, `.bas`, `.cls`, `.xlsm`, `.xlsb`, `.xlam` |
+### Composants principaux
+
+| Composant                                           | Rôle                                                                     |
+| --------------------------------------------------- | ------------------------------------------------------------------------ |
+| `src/index.html`                                    | Point d'entrée principal de l'application front-end                      |
+| `src/vendor/`                                       | Répertoire contenant les dépendances locales nécessaires au mode offline |
+| `src/vendor/tree-sitter-wasms/out/`                 | Grammaires Tree-sitter au format WASM utilisées pour l'analyse de code   |
+| `src/Récupérer les json pour exécution offline.ps1` | Script PowerShell de récupération des dépendances nécessaires            |
+
+### Dépendances locales notables
+
+Le dossier `src/vendor/` contient notamment :
+
+* `react.production.min.js` ;
+* `react-dom.production.min.js` ;
+* `babel.min.js` ;
+* `d3.min.js` ;
+* `d3-sankey.min.js` ;
+* `acorn.min.js` ;
+* `jszip.min.js` ;
+* `tree-sitter.js` ;
+* les grammaires WASM Tree-sitter sous `tree-sitter-wasms/out/`.
+
+### Fonctionnement général
+
+1. L'utilisateur sert localement les fichiers statiques du dossier `src`.
+2. Le navigateur charge `index.html` ainsi que les dépendances présentes dans `src/vendor/`.
+3. L'analyse du code est réalisée côté client.
+4. Les résultats sont affichés sous forme de graphes, heatmaps ou rapports exportables.
+
+Aucune base de données n'est utilisée par défaut. Aucun service serveur n'est nécessaire pour l'exécution standard.
 
 ---
 
-## Visualization Modes
+## ⚙️ Exploitation
 
-| Mode | Description |
-|------|-------------|
-| **Folder** | Color by directory structure |
-| **Layer** | Color by architectural layer (UI, Services, Utils, etc.) |
-| **Churn** | Color by commit frequency (hot spots) |
-| **Blast** | Color by impact when a file is selected |
-
----
-
-## Keyboard Shortcuts
-
-| Key | Action |
-|-----|--------|
-| `Enter` | Analyze repository |
-| `+` / `-` | Zoom in/out |
-| `Escape` | Close modal |
+| Élément     | Valeur                                                            |
+| ----------- | ----------------------------------------------------------------- |
+| Supervision | Non                                                               |
+| Sauvegarde  | Non concerné, hors sauvegarde du dépôt et des exports générés     |
+| Logs        | Console du navigateur et éventuels journaux du serveur HTTP local |
+| Astreinte   | Non                                                               |
 
 ---
 
-## API Limits
+## 🧰 Prérequis
 
-GitHub API has rate limits:
-- **Without token:** 60 requests/hour
-- **With Personal Access Token:** 5,000 requests/hour
-- **With GitHub App:** 5,000 requests/hour per installation
-
-### Authentication Methods
-
-#### Personal Access Token (PAT)
-1. Create a [GitHub Personal Access Token](https://github.com/settings/tokens) with `repo` scope
-2. Paste it in the Token field
-3. Analyze your private repos
-
-#### GitHub App Authentication
-For teams and organizations, GitHub App provides better security and higher rate limits:
-
-1. Create a [GitHub App](https://github.com/settings/apps) with repository permissions
-2. Install the app on your organization or personal account
-3. Generate an installation access token
-4. Paste the token in the Token field
-
-**Benefits of GitHub App:**
-- Fine-grained permissions control
-- Revocable access per installation
-- Higher rate limits (5,000 requests/hour)
-- Audit logging and security monitoring
-- No need to share personal credentials
-
-For larger repositories or team usage, we recommend using GitHub App authentication.
+* Navigateur moderne avec support WASM : Chrome, Edge ou Firefox.
+* Python 3, optionnel, pour démarrer un serveur HTTP local simple.
+* PowerShell sous Windows, uniquement pour exécuter le script de récupération des dépendances.
 
 ---
 
-## Architecture
+## 🚀 Installation et exécution offline
 
-```
-┌─────────────────────────────────────────────────┐
-│                   CodeFlow                      │
-├─────────────────────────────────────────────────┤
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐       │
-│  │  Parser  │  │  GitHub  │  │    D3    │       │
-│  │  Module  │  │   API    │  │  Graph   │       │
-│  └──────────┘  └──────────┘  └──────────┘       │
-│        │              │              │          │
-│        └──────────────┼──────────────┘          │
-│                       │                         │
-│              ┌────────▼────────┐                │
-│              │   React App     │                │
-│              │  (Single File)  │                │
-│              └─────────────────┘                │
-└─────────────────────────────────────────────────┘
-```
-
-**Zero build dependencies to install.** Everything runs from pinned CDNs:
-- React 18
-- D3.js 7
-- Babel (for JSX)
-
----
-
-## Contributing
-
-We love contributions! Here's how:
-
-1. Fork the repo
-2. Make your changes to `index.html`
-3. Test locally (just open in browser)
-4. Submit a PR
-
-If you're editing the markdown / wiki-link parser, Node.js unit tests live under `tests/` and run with no dependencies:
+### 1. Se placer dans le dossier `src`
 
 ```bash
-node --test tests/
+cd src
 ```
 
-`tests/verify-brain-vault.mjs` is an optional end-to-end script that always verifies the bundled fixtures and will also scan a real local vault when you explicitly set `BRAIN_VAULT=/path/to/vault`.
+### 2. Télécharger les dépendances si nécessaire
 
-### Ideas for Contributions
-- [ ] Add support for more languages
-- [ ] Improve function extraction regex
-- [ ] Add more design pattern detection
-- [ ] Export to different formats (PNG, PDF)
-- [ ] Add code complexity metrics
+Si le dossier `src/vendor/` n'est pas complet, exécuter le script PowerShell depuis le dossier `src` :
 
----
+```powershell
+.\"Récupérer les json pour exécution offline.ps1"
+```
 
-## FAQ
+### 3. Démarrer un serveur HTTP local
 
-**Q: How does it work without a backend?**
-> CodeFlow runs entirely in your browser. It calls the GitHub API directly from your browser and processes everything client-side.
+```bash
+python -m http.server 8080
+```
 
-**Q: Is my code safe?**
-> Yes. Your code is fetched directly from GitHub to your browser. Nothing is sent to any server we control. Check the source — it's one file!
+### 4. Ouvrir l'application
 
-**Q: Can I use it offline?**
-> Yes. With the local file analysis feature, you can analyze code from your computer without any internet connection. Click the "Open Folder" button and select your files. All processing happens entirely in your browser.
+Depuis le navigateur :
 
-**Q: Why is analysis slow?**
-> We make individual API calls for each file to get content. With a token, you get higher rate limits and faster analysis.
+```text
+http://127.0.0.1:8080/index.html
+```
 
-**Q: How accurate is the dependency analysis?**
-> It's based on function name matching, so it may miss some dynamic imports or renamed imports. It's designed for a quick overview, not 100% accuracy.
+Le serveur HTTP sert uniquement les fichiers statiques en local. Un autre serveur statique peut être utilisé si nécessaire.
 
 ---
 
-## Card Style Gallery
+## 🔒 Confidentialité
 
-All examples below are real cards rendered by the [CodeFlow Card Action](./card/) against this very repo. Pick one and drop it on your README.
+Tout le traitement est réalisé côté client, dans le navigateur.
 
-### `style: compact` — default
+Par défaut :
 
-<img src="./card/examples/compact.svg" alt="compact" width="100%" />
+* aucun fichier analysé n'est envoyé à un service externe ;
+* aucune API distante n'est nécessaire à l'exécution ;
+* les bibliothèques nécessaires sont chargées depuis `src/vendor/`.
 
-### `style: compact` with `show-grade: false, show-score: false`
-
-For public READMEs where you'd rather show data than a letter grade. The card stays informational — files, functions, LOC, languages, tests — without the judgmental bits.
-
-<img src="./card/examples/compact-private.svg" alt="compact private" width="100%" />
-
-### `accent` — any preset or CSS color
-
-The accent recolors the sparklines, links, and pin. Presets: `purple` (default), `teal`, `cyan`, `green`, `pink`, `blue`, `amber`, `red`. Or pass any CSS color (e.g. `#ff6b6b`).
-
-<img src="./card/examples/compact-teal.svg" alt="compact teal" width="100%" />
-<img src="./card/examples/compact-pink.svg" alt="compact pink" width="100%" />
-
-### `style: row` — status-bar strip
-
-<img src="./card/examples/row.svg" alt="row" width="100%" />
-
-### `style: minimal` — single text line
-
-<img src="./card/examples/minimal.svg" alt="minimal" width="100%" />
-
-### `style: hero` — splashy gradient
-
-<img src="./card/examples/hero.svg" alt="hero" width="100%" />
-
-`hero` with `show-grade: false`:
-
-<img src="./card/examples/hero-private.svg" alt="hero private" width="100%" />
-
-### `style: detailed` — information-rich
-
-Everything: grade, scale, language breakdown, composition (connections, tests, folders, function stats, patterns), top folders, fragility, hidden costs.
-
-<img src="./card/examples/detailed.svg" alt="detailed" width="100%" />
-
-`detailed` with `show-grade: false`:
-
-<img src="./card/examples/detailed-private.svg" alt="detailed private" width="100%" />
+Cette approche permet une utilisation dans des environnements soumis à des contraintes de confidentialité ou dépourvus d'accès Internet.
 
 ---
 
-## Star History
+## ⚠️ Points d'attention
 
-If you find CodeFlow useful, please star the repo.
-
----
-
-## License
-
-MIT License — use it however you want.
+* Vérifier que le dossier `src/vendor/` contient toutes les dépendances nécessaires avant une utilisation hors-ligne stricte.
+* Vérifier que le port `8080` est disponible avant de lancer le serveur HTTP local.
+* Si les chemins de `index.html` sont modifiés, adapter les références aux dépendances locales.
+* Si les chemins Tree-sitter sont modifiés, adapter également le chargement dynamique des fichiers WASM.
+* La licence du projet original est MIT, mais la présence d'un fichier `LICENSE` dans ce dépôt doit être vérifiée.
 
 ---
 
-<div align="center">
+## 🛠️ Dépannage
 
-**Built by developers, for developers**
+| Problème                         | Vérification / solution                                                                                        |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Page blanche ou interface cassée | Ouvrir la console du navigateur et vérifier les erreurs JavaScript ou les fichiers manquants en 404            |
+| Erreur de chargement WASM        | Vérifier la présence de `tree-sitter.wasm` et des fichiers `tree-sitter-<lang>.wasm` dans `src/vendor/`        |
+| Dépendances manquantes           | Relancer le script PowerShell ou télécharger manuellement les fichiers à partir des URL listées dans le script |
+| Port indisponible                | Utiliser un autre port, par exemple `python -m http.server 8081`                                               |
 
-*Stop guessing. Start seeing.*
+---
 
-</div>
+## 🤝 Contribuer
+
+Ce dépôt est une adaptation offline de CodeFlow.
+
+Les contributions peuvent porter sur :
+
+* les corrections de bugs ;
+* l'amélioration de l'analyse locale ;
+* l'ajout de formats d'export ;
+* la documentation développeur ;
+* l'amélioration du support offline.
+
+Projet original : [https://github.com/braedonsaunders/codeflow](https://github.com/braedonsaunders/codeflow)
+
+---
+
+## 📚 Documentation liée
+
+* Projet original CodeFlow : [https://github.com/braedonsaunders/codeflow](https://github.com/braedonsaunders/codeflow)
+* Documentation interne : À compléter
+* Procédure d'exploitation : À compléter
+* Documentation développeur : À compléter
+
+---
+
+## 📄 Licence
+
+Le projet original utilise la licence MIT.
+
+Vérifier la présence d'un fichier `LICENSE` dans ce dépôt et adapter cette section selon la licence effectivement retenue pour cette version offline.
+
+---
+
+## 🧾 Remarques finales
+
+Cette version vise une utilisation simple, locale et hors-ligne.
+
+Des compléments peuvent être ajoutés selon l'évolution du projet :
+
+* script NPM de lancement ;
+* documentation de debugging ;
+* description du format des rapports JSON ;
+* automatisation de la génération des exports ;
+* guide de contribution plus détaillé.
