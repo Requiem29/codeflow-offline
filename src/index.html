@@ -645,6 +645,7 @@ const LAYER_COLORS={ui:'#4d9fff',components:'#22d3ee',services:'#a78bfa',utils:'
 const IGNORE=new Set(['node_modules','.git','vendor','dist','build','__pycache__','.next','coverage','.venv','venv','env','.env','.tox','.mypy_cache','.pytest_cache','.ruff_cache','__pypackages__','.eggs','__macosx']);
 const DEFAULT_EXCLUDE_CHIPS=['.git','node_modules','dist','build','coverage','__pycache__','.next','.venv','venv','.tox'];
 const ANALYSIS_LIMITS={repoSoft:300,repoMax:750,localSoft:500};
+const FLOW_LIMITS={entryPointsPerFile:12,externalTargetsPerFile:10,syntheticEntries:25,minDepth:2,maxDepth:6,maxDepthCap:10,maxDisplayPaths:250,maxVizNodes:220,maxVizLinks:450,maxHotspots:8,maxBottlenecks:8,maxUseCaseOptions:60,maxFolderOptions:80,maxDrilldownPaths:8,criticalThreshold:10,highThreshold:7,mediumThreshold:5,externalWeight:3,completeBonus:1,incompletePenalty:2};
 
 // ---------------------------------------------------------------------------
 // Shared Helpers
@@ -2857,17 +2858,22 @@ function buildTree(files){
 
 function countFiles(n){return n.files.length+Object.values(n.children).reduce(function(s,c){return s+countFiles(c);},0);}
 
+function toFlowIdToken(value,fallback){
+    var token=String(value||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+    return token||fallback||'flow';
+}
+
 function detectFlowEntryPoints(content,path,name){
     var source=String(content||'');
     if(!source)return[];
     var out=[];
     var seen=new Set();
     var patterns=[
-        {type:'use_case',kind:'route',re:/\b(?:app|router)\.(get|post|put|patch|delete|options|head)\s*\(\s*['"`]([^'"`]+)['"`]/gi},
-        {type:'use_case',kind:'endpoint',re:/@(app|router|bp)?\.?(get|post|put|patch|delete|route)\s*\(\s*['"`]([^'"`]+)['"`]/gi},
+        {type:'use_case',kind:'route',re:/\b(?:app|router)\.(get|post|put|patch|delete|options|head)\s*\(\s*[`'"]([^`'"]+)[`'"]/gi},
+        {type:'use_case',kind:'endpoint',re:/@(app|router|bp)?\.?(get|post|put|patch|delete|route)\s*\(\s*[`'"]([^`'"]+)[`'"]/gi},
         {type:'use_case',kind:'handler',re:/\b(?:export\s+)?(?:async\s+)?function\s+((?:handle|on|process|execute)[A-Z_][A-Za-z0-9_]*)\s*\(/g},
         {type:'use_case',kind:'handler',re:/\bdef\s+((?:handle_|process_|execute_|on_)[a-zA-Z0-9_]+)\s*\(/g},
-        {type:'use_case',kind:'command',re:/\b(?:class\s+([A-Za-z0-9_]*Command)\b|command\s*[:=]\s*['"`]([^'"`]+)['"`])/g}
+        {type:'use_case',kind:'command',re:/\b(?:class\s+([A-Za-z0-9_]*Command)\b|command\s*[:=]\s*[`'"]([^`'"]+)[`'"])/g}
     ];
     patterns.forEach(function(pattern){
         var m;
@@ -2879,7 +2885,7 @@ function detectFlowEntryPoints(content,path,name){
             var key=pattern.kind+'|'+label.toLowerCase();
             if(seen.has(key))continue;
             seen.add(key);
-            var safeId=label.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'entry';
+            var safeId=toFlowIdToken(label,'entry');
             out.push({
                 id:'usecase:'+path+':'+safeId+':'+out.length,
                 type:pattern.type,
@@ -2890,7 +2896,7 @@ function detectFlowEntryPoints(content,path,name){
             });
         }
     });
-    return out.slice(0,12);
+    return out.slice(0,FLOW_LIMITS.entryPointsPerFile);
 }
 
 function detectExternalTargets(content,path){
@@ -2899,11 +2905,11 @@ function detectExternalTargets(content,path){
     var out=[];
     var seen=new Set();
     var patterns=[
-        {externalType:'http',re:/\b(?:fetch|axios\.(?:get|post|put|patch|delete)|requests\.(?:get|post|put|patch|delete)|httpx\.(?:get|post|put|patch|delete)|client\.(?:get|post|put|patch|delete)|urlopen)\s*\(\s*['"`]([^'"`]+)['"`]/gi},
-        {externalType:'db',re:/\b(?:SELECT|INSERT|UPDATE|DELETE)\b[\s\S]{0,120}\b(?:FROM|INTO)\s+([a-zA-Z0-9_."`]+)/gi},
-        {externalType:'db',re:/\b(?:mongoose\.model|sequelize\.define|db\.(?:query|execute)|cursor\.execute|session\.query)\s*\(\s*['"`]?([a-zA-Z0-9_.-]+)?/gi},
-        {externalType:'queue',re:/\b(?:publish|sendToQueue|produce|kafka\.|sns\.publish|sqs\.sendMessage|channel\.sendToQueue)\s*\(\s*['"`]([^'"`]+)['"`]/gi},
-        {externalType:'filesystem',re:/\b(?:fs\.(?:writeFile|appendFile|createWriteStream)|open\s*\(\s*['"`][^'"`]+['"`]\s*,\s*['"`][wa])/gi}
+        {externalType:'http',re:/\b(?:fetch|axios\.(?:get|post|put|patch|delete)|requests\.(?:get|post|put|patch|delete)|httpx\.(?:get|post|put|patch|delete)|client\.(?:get|post|put|patch|delete)|urlopen)\s*\(\s*[`'"]([^`'"]+)[`'"]/gi},
+        {externalType:'db',re:/\b(?:SELECT|INSERT|UPDATE|DELETE)\b[\s\S]{0,120}\b(?:FROM|INTO)\s+[`"]?([a-zA-Z0-9_.]+)[`"]?/gi},
+        {externalType:'db',re:/\b(?:mongoose\.model|sequelize\.define|db\.(?:query|execute)|cursor\.execute|session\.query)\s*\(\s*[`'"]?([a-zA-Z0-9_.-]+)?/gi},
+        {externalType:'queue',re:/\b(?:publish|sendToQueue|produce|kafka\.|sns\.publish|sqs\.sendMessage|channel\.sendToQueue)\s*\(\s*[`'"]([^`'"]+)[`'"]/gi},
+        {externalType:'filesystem',re:/\b(?:fs\.(?:writeFile|appendFile|createWriteStream)|open\s*\(\s*[`'"][^`'"]+[`'"]\s*,\s*[`'"][wa])/gi}
     ];
     patterns.forEach(function(pattern){
         var m;
@@ -2912,7 +2918,7 @@ function detectExternalTargets(content,path){
             var key=pattern.externalType+'|'+label.toLowerCase();
             if(seen.has(key))continue;
             seen.add(key);
-            var safeId=label.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||pattern.externalType;
+            var safeId=toFlowIdToken(label,pattern.externalType);
             out.push({
                 id:'external:'+pattern.externalType+':'+safeId,
                 type:'external',
@@ -2922,12 +2928,12 @@ function detectExternalTargets(content,path){
             });
         }
     });
-    return out.slice(0,10);
+    return out.slice(0,FLOW_LIMITS.externalTargetsPerFile);
 }
 
 function buildFlowGraph(files,connections,options){
     var opts=options||{};
-    var maxDepth=Math.max(2,Math.min(10,opts.maxDepth||6));
+    var maxDepth=Math.max(FLOW_LIMITS.minDepth,Math.min(FLOW_LIMITS.maxDepthCap,opts.maxDepth||FLOW_LIMITS.maxDepth));
     var fileByPath=Object.create(null);
     var outgoing=Object.create(null);
     var incoming=Object.create(null);
@@ -2974,7 +2980,7 @@ function buildFlowGraph(files,connections,options){
         });
     });
     if(entrySeeds.length===0){
-        files.filter(function(file){return (incoming[file.path]||[]).length===0;}).slice(0,25).forEach(function(file){
+        files.filter(function(file){return (incoming[file.path]||[]).length===0;}).slice(0,FLOW_LIMITS.syntheticEntries).forEach(function(file){
             var syntheticId='usecase:'+file.path+':root';
             flowNodes.set(syntheticId,{id:syntheticId,type:'use_case',label:file.name,kind:'file_entry',file:file.path});
             entrySeeds.push({entry:{id:syntheticId,label:file.name,kind:'file_entry',type:'use_case',file:file.path},file:file.path});
@@ -2998,8 +3004,8 @@ function buildFlowGraph(files,connections,options){
         if(pathSeen.has(signature))return;
         pathSeen.add(signature);
         var fileDepth=pathFileIds.length;
-        var score=fileDepth+(external?3:0)+(isComplete?1:2);
-        var level=score>=10?'critical':score>=7?'high':score>=5?'medium':'low';
+        var score=fileDepth+(external?FLOW_LIMITS.externalWeight:0)+(isComplete?FLOW_LIMITS.completeBonus:FLOW_LIMITS.incompletePenalty);
+        var level=score>=FLOW_LIMITS.criticalThreshold?'critical':score>=FLOW_LIMITS.highThreshold?'high':score>=FLOW_LIMITS.mediumThreshold?'medium':'low';
         flowPaths.push({
             id:'flow:'+flowPaths.length,
             type:external?'external':(isComplete?'use_case':'file_to_file'),
@@ -3022,7 +3028,7 @@ function buildFlowGraph(files,connections,options){
     entrySeeds.forEach(function(seed){
         addFlowConnection(seed.entry.id,seed.file,'use_case',1);
         var localSeen=new Set();
-        function walk(current,pathFileIds,depth){
+        function walk(current,pathFileIds,pathSet,depth){
             if(depth>=maxDepth){
                 pushFlowPath(seed.entry,pathFileIds,null,false,'Depth limit reached');
                 return;
@@ -3052,14 +3058,17 @@ function buildFlowGraph(files,connections,options){
                 var edgeKey=edge.source+'>'+edge.target;
                 if(localSeen.has(edgeKey))return;
                 localSeen.add(edgeKey);
-                if(pathFileIds.indexOf(edge.target)>=0){
+                if(pathSet.has(edge.target)){
                     pushFlowPath(seed.entry,pathFileIds.concat([edge.target]),null,false,'Cycle detected');
                     return;
                 }
-                walk(edge.target,pathFileIds.concat([edge.target]),depth+1);
+                var nextPath=pathFileIds.concat([edge.target]);
+                var nextSet=new Set(pathSet);
+                nextSet.add(edge.target);
+                walk(edge.target,nextPath,nextSet,depth+1);
             });
         }
-        walk(seed.file,[seed.file],0);
+        walk(seed.file,[seed.file],new Set([seed.file]),0);
     });
 
     var flowConnections=Array.from(flowConnectionsMap.values());
@@ -3076,7 +3085,7 @@ function buildFlowGraph(files,connections,options){
             }
         });
     });
-    flowMetrics.hotspots=Object.entries(nodeHits).sort(function(a,b){return b[1]-a[1];}).slice(0,8).map(function(entry){
+    flowMetrics.hotspots=Object.entries(nodeHits).sort(function(a,b){return b[1]-a[1];}).slice(0,FLOW_LIMITS.maxHotspots).map(function(entry){
         var node=flowNodes.get(entry[0])||{};
         return{id:entry[0],label:node.label||entry[0],path:node.path||entry[0],traversals:entry[1]};
     });
@@ -3090,7 +3099,7 @@ function buildFlowGraph(files,connections,options){
     flowMetrics.bottlenecks=Object.entries(degreeMap).map(function(entry){
         var node=flowNodes.get(entry[0])||{};
         return{id:entry[0],label:node.label||entry[0],path:node.path||null,type:node.type||'file',score:entry[1].in+entry[1].out,inDegree:entry[1].in,outDegree:entry[1].out};
-    }).filter(function(item){return item.type==='file';}).sort(function(a,b){return b.score-a.score;}).slice(0,8);
+    }).filter(function(item){return item.type==='file';}).sort(function(a,b){return b.score-a.score;}).slice(0,FLOW_LIMITS.maxBottlenecks);
     flowMetrics.maxDepth=maxDepth;
     flowMetrics.pathCount=flowPaths.length;
 
@@ -3657,7 +3666,7 @@ function filterFullFlowGraph(data,filters){
             if(hay.indexOf(query)<0)return false;
         }
         return true;
-    }).slice(0,250);
+    }).slice(0,FLOW_LIMITS.maxDisplayPaths);
 
     var nodeIdSet=new Set();
     selectedPaths.forEach(function(path){
@@ -5182,9 +5191,9 @@ function App(){
         var g=svg.append('g').attr('transform','translate(20,20)');
         var zoom=d3.zoom().scaleExtent([0.4,2.6]).on('zoom',function(e){g.attr('transform','translate('+(20+e.transform.x)+','+(20+e.transform.y)+') scale('+e.transform.k+')');});
         svg.call(zoom);
-        var nodes=flowViewData.nodes.slice(0,220).map(function(node){return Object.assign({},node);});
+        var nodes=flowViewData.nodes.slice(0,FLOW_LIMITS.maxVizNodes).map(function(node){return Object.assign({},node);});
         var nodeIdSet=new Set(nodes.map(function(node){return node.id;}));
-        var links=flowViewData.connections.filter(function(edge){return nodeIdSet.has(edge.source)&&nodeIdSet.has(edge.target);}).slice(0,450).map(function(edge){
+        var links=flowViewData.connections.filter(function(edge){return nodeIdSet.has(edge.source)&&nodeIdSet.has(edge.target);}).slice(0,FLOW_LIMITS.maxVizLinks).map(function(edge){
             return{source:edge.source,target:edge.target,value:Math.max(1,edge.weight||1),type:edge.type};
         });
         if(!nodes.length||!links.length){
@@ -6016,7 +6025,7 @@ function App(){
                             React.createElement('span',{className:'config-label'},'Use Case'),
                             React.createElement('select',{className:'form-input',style:{fontSize:10,padding:'6px 8px'},value:flowFilters.useCase,onChange:function(e){setFlowFilters(Object.assign({},flowFilters,{useCase:e.target.value}));}},
                                 React.createElement('option',{value:'all'},'All'),
-                                (data.flows&&data.flows.paths?[...new Set(data.flows.paths.map(function(path){return path.useCase;}))].slice(0,60):[]).map(function(useCase){return React.createElement('option',{key:useCase,value:useCase},useCase);})
+                                (data.flows&&data.flows.paths?[...new Set(data.flows.paths.map(function(path){return path.useCase;}))].slice(0,FLOW_LIMITS.maxUseCaseOptions):[]).map(function(useCase){return React.createElement('option',{key:useCase,value:useCase},useCase);})
                             )
                         ),
                         React.createElement('div',{className:'config-row'},
@@ -6030,7 +6039,7 @@ function App(){
                             React.createElement('span',{className:'config-label'},'Folder'),
                             React.createElement('select',{className:'form-input',style:{fontSize:10,padding:'6px 8px'},value:flowFilters.folder,onChange:function(e){setFlowFilters(Object.assign({},flowFilters,{folder:e.target.value}));}},
                                 React.createElement('option',{value:'all'},'All'),
-                                data.folders.slice(0,80).map(function(folder){return React.createElement('option',{key:folder,value:folder},folder||'root');})
+                                data.folders.slice(0,FLOW_LIMITS.maxFolderOptions).map(function(folder){return React.createElement('option',{key:folder,value:folder},folder||'root');})
                             )
                         ),
                         React.createElement('label',{className:'config-check'},
@@ -6289,7 +6298,7 @@ function App(){
                                         ' • ',selectedFlowPath.criticality.toUpperCase(),
                                         selectedFlowPath.breakReason?' • '+selectedFlowPath.breakReason:''
                                     ),
-                                    flowViewData.paths.slice(0,8).map(function(path){
+                                    flowViewData.paths.slice(0,FLOW_LIMITS.maxDrilldownPaths).map(function(path){
                                         var isSelected=selectedFlowPath&&selectedFlowPath.id===path.id;
                                         return React.createElement('div',{key:path.id,className:'security-item '+(path.criticality==='critical'?'high':path.criticality==='high'?'medium':'low'),style:{padding:8,marginBottom:6,borderColor:isSelected?'var(--acc)':'transparent'},onClick:function(){setSelectedFlowPath(path);}},
                                             React.createElement('div',{className:'security-header'},
