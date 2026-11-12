@@ -2,7 +2,7 @@
 
 ## Objectif
 
-L'écran `src/flux-audit.html` ajoute une vue d'analyse orientée flux. Il sert à repérer rapidement :
+L'écran `src/flux.html` ajoute une vue d'analyse orientée flux. Il sert à repérer rapidement :
 
 - les fichiers qui appellent un serveur extérieur ;
 - les fichiers qui récupèrent des données depuis un serveur ;
@@ -24,7 +24,7 @@ python -m http.server 8080
 Puis ouvrir :
 
 ```text
-http://127.0.0.1:8080/flux-audit.html
+http://127.0.0.1:8080/flux.html
 ```
 
 Deux entrées sont disponibles :
@@ -41,6 +41,44 @@ La vue présente :
 - un tableau filtrable avec type de flux, fichier, ligne, cible, risque et extrait de code ;
 - des filtres rapides : sorties réseau, entrées réseau, écritures disque, lectures disque, services, chemins hors périmètre et serveurs externes ;
 - des exports JSON et CSV.
+
+## Sécurité export CSV (formules tableur)
+
+L'export CSV neutralise désormais les cellules textuelles qui pourraient être interprétées comme formule tableur.
+
+Politique appliquée :
+
+- détection sur texte après suppression d'un préfixe initial d'espaces et de contrôles (`\\u0000-\\u001F`, `\\u007F`, espaces, tabulations, CR/LF) ;
+- si le premier caractère significatif est `=`, `+`, `-` ou `@`, préfixage de la cellule par une apostrophe `'` ;
+- conservation du format CSV existant : séparateur `;`, guillemets doublés, retours à la ligne, Unicode, en-têtes et ordre des colonnes.
+
+Limites connues :
+
+- la protection est faite au moment de l'export CSV et ne modifie pas les données d'analyse en mémoire ni l'export JSON ;
+- selon le tableur et les options d'import/export, une cellule préfixée peut être réécrite différemment lors d'une sauvegarde/réouverture.
+
+## Validation reproductible
+
+Commande reproductible (sans dépendance externe) :
+
+```bash
+node /home/runner/work/codeflow-offline/codeflow-offline/scripts/test-flux-csv-export.mjs
+```
+
+Ce test couvre une matrice synthétique :
+
+- texte ordinaire ;
+- préfixes `=`, `+`, `-`, `@` ;
+- préfixes avec espaces, tabulation, CR/LF ;
+- guillemets, séparateurs, retours à la ligne, Unicode ;
+- vérification d'en-tête/ordre des colonnes CSV ;
+- non-régression JSON/données source : objets de `findings` inchangés après sérialisation CSV.
+
+Résultats constatés :
+
+- script `node` : OK (tous les contrôles passent) ;
+- vérification Excel ouverture/sauvegarde/réouverture : non exécutée dans cet environnement (Excel indisponible) ;
+- téléchargement navigateur : à vérifier manuellement dans un navigateur local (bouton **Exporter CSV**).
 
 ## Heuristiques couvertes
 
