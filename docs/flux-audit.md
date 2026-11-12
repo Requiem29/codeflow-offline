@@ -2,7 +2,7 @@
 
 ## Objectif
 
-L'écran `src/flux-audit.html` ajoute une vue d'analyse orientée flux. Il sert à repérer rapidement :
+L'écran `src/flux.html` ajoute une vue d'analyse orientée flux. Il sert à repérer rapidement :
 
 - les fichiers qui appellent un serveur extérieur ;
 - les fichiers qui récupèrent des données depuis un serveur ;
@@ -24,7 +24,7 @@ python -m http.server 8080
 Puis ouvrir :
 
 ```text
-http://127.0.0.1:8080/flux-audit.html
+http://127.0.0.1:8080/flux.html
 ```
 
 Deux entrées sont disponibles :
@@ -41,6 +41,46 @@ La vue présente :
 - un tableau filtrable avec type de flux, fichier, ligne, cible, risque et extrait de code ;
 - des filtres rapides : sorties réseau, entrées réseau, écritures disque, lectures disque, services, chemins hors périmètre et serveurs externes ;
 - des exports JSON et CSV.
+
+## Sécurité export CSV (formules tableur)
+
+L'export CSV neutralise désormais les cellules textuelles qui pourraient être interprétées comme formule tableur.
+
+Politique appliquée :
+
+- détection sur texte après suppression d'un préfixe initial d'espaces et de contrôles (`\\u0000-\\u001F`, `\\u007F`, espaces, tabulations, CR/LF) ;
+- si le premier caractère significatif est `=`, `+`, `-` ou `@`, préfixage de la cellule par une apostrophe `'` ;
+- conservation du format CSV existant : séparateur `;`, guillemets doublés, retours à la ligne, Unicode, en-têtes et ordre des colonnes.
+
+Limites connues :
+
+- la protection est faite au moment de l'export CSV et ne modifie pas les données d'analyse en mémoire ni l'export JSON ;
+- selon le tableur et les options d'import/export, une cellule préfixée peut être réécrite différemment lors d'une sauvegarde/réouverture.
+
+## Validation reproductible
+
+Commande reproductible (sans dépendance externe) :
+
+```bash
+node scripts/test-flux-csv-export.mjs
+```
+
+Ce test s'exécute depuis un clone du dépôt, sans installation npm : il charge le JSZip déjà fourni dans `src/vendor/` et utilise des chemins résolus depuis le script. Il couvre :
+
+- texte ordinaire ;
+- préfixes `=`, `+`, `-`, `@` ;
+- préfixes avec espaces, tabulation, CR/LF ;
+- guillemets, séparateurs, retours à la ligne, Unicode ;
+- vérification d'en-tête/ordre des colonnes CSV ;
+- génération puis comparaison de l'export JSON complet (`files`, `findings`, `flows`, `services`) et absence de modification des données en mémoire ;
+- une archive ZIP générée par le test, relue avec le lecteur ZIP de l'application, dont des noms et des contenus commencent par des préfixes dangereux.
+
+Limites de validation :
+
+- exécuter le script Node ci-dessus sur le commit à réviser et conserver son résultat ;
+- le test ZIP couvre la lecture ZIP et sa sérialisation CSV, pas l'intégralité de la détection heuristique dans le navigateur ;
+- vérifier séparément le téléchargement navigateur avec le bouton **Exporter CSV** ;
+- vérifier dans Excel l'ouverture, la sauvegarde et la réouverture du CSV : ce test n'a pas été effectué dans cette correction, donc aucune garantie de sécurité Excel n'est revendiquée.
 
 ## Heuristiques couvertes
 
