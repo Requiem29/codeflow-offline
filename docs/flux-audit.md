@@ -62,23 +62,25 @@ Limites connues :
 Commande reproductible (sans dépendance externe) :
 
 ```bash
-node /home/runner/work/codeflow-offline/codeflow-offline/scripts/test-flux-csv-export.mjs
+node scripts/test-flux-csv-export.mjs
 ```
 
-Ce test couvre une matrice synthétique :
+Ce test s'exécute depuis un clone du dépôt, sans installation npm : il charge le JSZip déjà fourni dans `src/vendor/` et utilise des chemins résolus depuis le script. Il couvre :
 
 - texte ordinaire ;
 - préfixes `=`, `+`, `-`, `@` ;
 - préfixes avec espaces, tabulation, CR/LF ;
 - guillemets, séparateurs, retours à la ligne, Unicode ;
 - vérification d'en-tête/ordre des colonnes CSV ;
-- non-régression JSON/données source : objets de `findings` inchangés après sérialisation CSV.
+- génération puis comparaison de l'export JSON complet (`files`, `findings`, `flows`, `services`) et absence de modification des données en mémoire ;
+- une archive ZIP générée par le test, relue avec le lecteur ZIP de l'application, dont des noms et des contenus commencent par des préfixes dangereux.
 
-Résultats constatés :
+Limites de validation :
 
-- script `node` : OK (tous les contrôles passent) ;
-- vérification Excel ouverture/sauvegarde/réouverture : non exécutée dans cet environnement (Excel indisponible) ;
-- téléchargement navigateur : à vérifier manuellement dans un navigateur local (bouton **Exporter CSV**).
+- exécuter le script Node ci-dessus sur le commit à réviser et conserver son résultat ;
+- le test ZIP couvre la lecture ZIP et sa sérialisation CSV, pas l'intégralité de la détection heuristique dans le navigateur ;
+- vérifier séparément le téléchargement navigateur avec le bouton **Exporter CSV** ;
+- vérifier dans Excel l'ouverture, la sauvegarde et la réouverture du CSV : ce test n'a pas été effectué dans cette correction, donc aucune garantie de sécurité Excel n'est revendiquée.
 
 ## Heuristiques couvertes
 
